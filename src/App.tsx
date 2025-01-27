@@ -26,10 +26,10 @@ function App() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const items = await StructuresManager.getInstance().getAll().then((data) => {
-        console.log(data);
-        setItemsList(data);
-      }).catch((err) => { console.error(err); });
+      // const items = await StructuresManager.getInstance().getAll().then((data) => {
+      //   console.log(data);
+      //   setItemsList(data);
+      // }).catch((err) => { console.error(err); });
     };
 
     fetchItems();

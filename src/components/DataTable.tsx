@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { FloatingActionMenu, ActionMenuTrigger } from './FloatingActionMenu';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -31,18 +32,14 @@ export function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: null });
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRefs = useRef<(React.RefObject<HTMLButtonElement>)[]>([]);
 
+  // Initialize refs for each row
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setActiveMenu(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    triggerRefs.current = data.map((_, i) => 
+      triggerRefs.current[i] || React.createRef<HTMLButtonElement>()
+    );
+  }, [data]);
 
   if (!data.length) return null;
 
@@ -159,7 +156,7 @@ export function DataTable<T extends Record<string, any>>({
         direction: newDirection,
       };
     });
-  };
+  }
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortState.column || !sortState.direction) return 0;
@@ -207,34 +204,17 @@ export function DataTable<T extends Record<string, any>>({
               ))}
               {actions.length > 0 && (
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={() => setActiveMenu(activeMenu === index ? null : index)}
-                      className="invisible group-hover:visible p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                      <MoreVertical className="h-4 w-4 text-gray-500" />
-                    </button>
-                    {activeMenu === index && (
-                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                        <div className="py-1" role="menu">
-                          {actions.map((action, actionIndex) => (
-                            <button
-                              key={actionIndex}
-                              onClick={() => {
-                                action.onClick(item);
-                                setActiveMenu(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                              role="menuitem"
-                            >
-                              {action.icon && <span>{action.icon}</span>}
-                              <span>{action.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <ActionMenuTrigger
+                    ref={triggerRefs.current[index]}
+                    onClick={() => setActiveMenu(activeMenu === index ? null : index)}
+                  />
+                  <FloatingActionMenu
+                    actions={actions}
+                    item={item}
+                    triggerRef={triggerRefs.current[index]}
+                    isOpen={activeMenu === index}
+                    onClose={() => setActiveMenu(null)}
+                  />
                 </td>
               )}
             </tr>
