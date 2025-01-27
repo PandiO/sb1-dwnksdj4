@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { FloatingActionMenu, ActionMenuTrigger } from './FloatingActionMenu';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -31,15 +30,6 @@ export function DataTable<T extends Record<string, any>>({
   actions = [],
 }: DataTableProps<T>) {
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: null });
-  const [activeMenu, setActiveMenu] = useState<number | null>(null);
-  const triggerRefs = useRef<(React.RefObject<HTMLButtonElement>)[]>([]);
-
-  // Initialize refs for each row
-  useEffect(() => {
-    triggerRefs.current = data.map((_, i) => 
-      triggerRefs.current[i] || React.createRef<HTMLButtonElement>()
-    );
-  }, [data]);
 
   if (!data.length) return null;
 
@@ -192,7 +182,7 @@ export function DataTable<T extends Record<string, any>>({
           {sortedData.map((item, index) => (
             <tr
               key={index}
-              className="hover:bg-gray-50 transition-colors relative group"
+              className="hover:bg-gray-50 transition-colors"
             >
               {columns.map((column) => (
                 <td
@@ -203,18 +193,17 @@ export function DataTable<T extends Record<string, any>>({
                 </td>
               ))}
               {actions.length > 0 && (
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <ActionMenuTrigger
-                    ref={triggerRefs.current[index]}
-                    onClick={() => setActiveMenu(activeMenu === index ? null : index)}
-                  />
-                  <FloatingActionMenu
-                    actions={actions}
-                    item={item}
-                    triggerRef={triggerRefs.current[index]}
-                    isOpen={activeMenu === index}
-                    onClose={() => setActiveMenu(null)}
-                  />
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                  {actions.map((action, actionIndex) => (
+                    <button
+                      key={actionIndex}
+                      onClick={() => action.onClick(item)}
+                      className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                      title={action.label}
+                    >
+                      {action.icon}
+                    </button>
+                  ))}
                 </td>
               )}
             </tr>
