@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ObjectCreator } from './components/ObjectCreator';
@@ -7,8 +7,11 @@ import { DataTable } from './components/DataTable';
 import { Pencil, Trash2, Eye } from 'lucide-react';
 import { objectConfigs } from './config/objectConfigs';
 import { testData } from './data/testData';
+import { StructuresManager } from './io/structures';
 
 function App() {
+  const [itemsList, setItemsList] = useState<any[]>([]);
+
   const handleView = (item: any) => {
     console.log('View item:', item);
   };
@@ -20,6 +23,17 @@ function App() {
   const handleDelete = (item: any) => {
     console.log('Delete item:', item);
   };
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      const items = await StructuresManager.getInstance().getAll().then((data) => {
+        console.log(data);
+        setItemsList(data);
+      }).catch((err) => { console.error(err); });
+    };
+
+    fetchItems();
+  }, []);
 
   const tableActions = [
     {
@@ -60,7 +74,7 @@ function App() {
                   <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Towns</h2>
                     <DataTable
-                      data={[testData.town]}
+                      data={itemsList}
                       formatters={{
                         ...defaultFormatters,
                         RegionName: (value) => (
