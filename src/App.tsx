@@ -1,17 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ObjectCreator } from './components/ObjectCreator';
 import { LandingPage } from './pages/LandingPage';
+import { ObjectViewPage } from './pages/ObjectViewPage';
 import { DataTable } from './components/DataTable';
 import { Pencil, Trash2, Eye } from 'lucide-react';
 import { objectConfigs } from './config/objectConfigs';
 import { testData } from './data/testData';
-import { StructuresManager } from './io/structures';
 
 function App() {
+  const navigate = useNavigate();
+
   const handleView = (item: any) => {
-    console.log('View item:', item);
+    // Determine the type based on the item's properties
+    let type = 'structure';
+    if ('RequiredTitle' in item) {
+      type = 'town';
+    } else if ('TownId' in item) {
+      type = 'district';
+    }
+    navigate(`/view/${type}/${item.Id}`);
   };
 
   const handleEdit = (item: any) => {
@@ -67,6 +76,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/create/:objectType" element={<ObjectCreator />} />
+            <Route path="/view/:type/:id" element={<ObjectViewPage />} />
             <Route path="/dashboard" element={
               <div className="p-8">
                 <div className="max-w-7xl mx-auto space-y-12">

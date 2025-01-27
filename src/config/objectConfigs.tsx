@@ -11,21 +11,6 @@ const defaultLocationValue: Location = {
   pitch: 0,
 };
 
-export const placeholderConfigs = {
-  text: {
-    type: 'text',
-    placeholder: 'Enter a value'
-  },
-  mail: {
-    type: 'mail',
-    placeholder: 'Enter an email address'
-  },
-  number: {
-    type: 'number',
-    placeholder: 'Enter a number'
-  },
-}
-
 export const commonFields: Record<string, FormField> = {
   id: { name: 'id', label: 'Id', type: 'number', required: false, hidden: true, defaultValue: -1 },
   name: {
@@ -34,7 +19,7 @@ export const commonFields: Record<string, FormField> = {
     type: 'text',
     required: true,
     validation: (value) => {
-      if (!value || value.length < 3) return 'Town name must be at least 3 characters';
+      if (!value || value.length < 3) return 'Name must be at least 3 characters';
     }
   },
   description: {
@@ -43,7 +28,7 @@ export const commonFields: Record<string, FormField> = {
     type: 'text',
     required: false
   }
-}
+};
 
 const locationConfig: ObjectConfig = {
   type: 'location',
@@ -58,8 +43,9 @@ const locationConfig: ObjectConfig = {
     yaw: { name: 'yaw', label: 'Yaw', type: 'number', required: false, defaultValue: 0 },
     pitch: { name: 'pitch', label: 'Pitch', type: 'number', required: false, defaultValue: 0 },
     worldName: { name: 'WorldName', label: 'World Name', type: 'text', required: true, defaultValue: 'world' }
-  }
-}
+  },
+  showViewButton: false
+};
 
 const dominionConfig: ObjectConfig = {
   type: 'dominion',
@@ -106,7 +92,7 @@ const dominionConfig: ObjectConfig = {
     ),
     created: (value: Date) => value.toLocaleDateString()
   }
-}
+};
 
 const townConfig: ObjectConfig = {
   type: 'town',
@@ -126,7 +112,7 @@ const townConfig: ObjectConfig = {
     }
   },
   formatters: dominionConfig.formatters
-}
+};
 
 const districtConfig: ObjectConfig = {
   type: 'district',
@@ -143,7 +129,7 @@ const districtConfig: ObjectConfig = {
     },
   },
   formatters: dominionConfig.formatters
-}
+};
 
 const streetConfig: ObjectConfig = {
   type: 'street',
@@ -161,43 +147,43 @@ const streetConfig: ObjectConfig = {
     }
   },
   formatters: dominionConfig.formatters
-}
+};
 
 const structureConfig: ObjectConfig = {
   type: 'structure',
-    label: 'Structure',
-    icon: <Building2 className="h-5 w-5" />,
-    fields: {
-      ...dominionConfig.fields,
-      district: {
-        name: 'District',
-        label: 'District',
-        type: 'object',
-        required: true,
-        objectConfig: districtConfig
-      },
-      street: {
-        name: 'Street',
-        label: 'Street',
-        type: 'object',
-        required: true,
-        objectConfig: streetConfig
-      },
-      streetNumber: {
-        name: 'StreetNumber',
-        label: 'Street Number',
-        type: 'number',
-        required: false,
-        validation: (value) => {
-          if (value < 1) return 'Street number must be positive';
-        }
-      },
+  label: 'Structure',
+  icon: <Building2 className="h-5 w-5" />,
+  fields: {
+    ...dominionConfig.fields,
+    district: {
+      name: 'District',
+      label: 'District',
+      type: 'object',
+      required: true,
+      objectConfig: districtConfig
     },
-    formatters: {
-      ...dominionConfig.formatters,
-      streetNumber: (value) => `#${value}`
-    }
-}
+    street: {
+      name: 'Street',
+      label: 'Street',
+      type: 'object',
+      required: true,
+      objectConfig: streetConfig
+    },
+    streetNumber: {
+      name: 'StreetNumber',
+      label: 'Street Number',
+      type: 'number',
+      required: false,
+      validation: (value) => {
+        if (value < 1) return 'Street number must be positive';
+      }
+    },
+  },
+  formatters: {
+    ...dominionConfig.formatters,
+    streetNumber: (value) => `#${value}`
+  }
+};
 
 export const objectConfigs: Record<string, ObjectConfig> = {
   location: locationConfig,
