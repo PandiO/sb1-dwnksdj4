@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, Trash2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -18,18 +19,54 @@ interface DataTableProps<T extends Record<string, any>> {
   data: T[];
   excludeColumns?: (keyof T)[];
   formatters?: Partial<Record<keyof T, (value: any) => React.ReactNode>>;
-  headers?: Partial<Record<keyof T, string>>;
-  actions?: ActionItem[];
+  headers?: Partial<Record<keyof T, string>>;  
 }
 
 export function DataTable<T extends Record<string, any>>({
   data,
   excludeColumns = [],
   formatters = {},
-  headers = {},
-  actions = [],
+  headers = {}
 }: DataTableProps<T>) {
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: null });
+  const navigate = useNavigate();
+
+  const handleView = (item: T) => {
+    // Determine the type based on the item's properties
+    let type = 'structure';
+    if ('RequiredTitle' in item) {
+      type = 'town';
+    } else if ('TownId' in item) {
+      type = 'district';
+    }
+    navigate(`/view/${type}/${item.Id}`);
+  };
+
+  const handleEdit = (item: T) => {
+    console.log('Edit item:', item);
+  };
+
+  const handleDelete = (item: T) => {
+    console.log('Delete item:', item);
+  };
+
+  const actions: ActionItem[] = [
+    {
+      label: 'View',
+      onClick: handleView,
+      icon: <Eye className="h-4 w-4" />,
+    },
+    {
+      label: 'Edit',
+      onClick: handleEdit,
+      icon: <Pencil className="h-4 w-4" />,
+    },
+    {
+      label: 'Delete',
+      onClick: handleDelete,
+      icon: <Trash2 className="h-4 w-4" />,
+    },
+  ];
 
   if (!data.length) return null;
 

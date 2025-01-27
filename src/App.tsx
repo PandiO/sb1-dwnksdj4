@@ -5,50 +5,9 @@ import { ObjectCreator } from './components/ObjectCreator';
 import { LandingPage } from './pages/LandingPage';
 import { ObjectViewPage } from './pages/ObjectViewPage';
 import { DataTable } from './components/DataTable';
-import { Pencil, Trash2, Eye } from 'lucide-react';
-import { objectConfigs } from './config/objectConfigs';
 import { testData } from './data/testData';
 
 function App() {
-  const navigate = useNavigate();
-
-  const handleView = (item: any) => {
-    // Determine the type based on the item's properties
-    let type = 'structure';
-    if ('RequiredTitle' in item) {
-      type = 'town';
-    } else if ('TownId' in item) {
-      type = 'district';
-    }
-    navigate(`/view/${type}/${item.Id}`);
-  };
-
-  const handleEdit = (item: any) => {
-    console.log('Edit item:', item);
-  };
-
-  const handleDelete = (item: any) => {
-    console.log('Delete item:', item);
-  };
-
-  const tableActions = [
-    {
-      label: 'View',
-      onClick: handleView,
-      icon: <Eye className="h-4 w-4" />,
-    },
-    {
-      label: 'Edit',
-      onClick: handleEdit,
-      icon: <Pencil className="h-4 w-4" />,
-    },
-    {
-      label: 'Delete',
-      onClick: handleDelete,
-      icon: <Trash2 className="h-4 w-4" />,
-    },
-  ];
-
   // Default formatters for common fields
   const defaultFormatters = {
     Created: (value: Date) => value?.toLocaleDateString(),
@@ -88,9 +47,8 @@ function App() {
                       excludeColumns={['Town', 'TownId']}
                       formatters={{
                         ...defaultFormatters,
-                        Description: (value) => value || '-',
+                        Description: (value) => value || '-'
                       }}
-                      actions={tableActions}
                     />
                   </div>
 
@@ -106,10 +64,8 @@ function App() {
                       excludeColumns={['District', 'DistrictId', 'Street', 'StreetId']}
                       formatters={{
                         ...defaultFormatters,
-                        Description: (value) => value || '-',
-                        StreetNumber: (value) => `#${value}`,
+                        Description: (value) => value || '-'
                       }}
-                      actions={tableActions}
                     />
                   </div>
                 </div>

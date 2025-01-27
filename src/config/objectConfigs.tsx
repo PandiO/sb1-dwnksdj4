@@ -11,6 +11,21 @@ const defaultLocationValue: Location = {
   pitch: 0,
 };
 
+export const placeholderConfigs = {
+  text: {
+    type: 'text',
+    placeholder: 'Enter a value'
+  },
+  mail: {
+    type: 'mail',
+    placeholder: 'Enter an email address'
+  },
+  number: {
+    type: 'number',
+    placeholder: 'Enter a number'
+  },
+}
+
 export const commonFields: Record<string, FormField> = {
   id: { name: 'id', label: 'Id', type: 'number', required: false, hidden: true, defaultValue: -1 },
   name: {

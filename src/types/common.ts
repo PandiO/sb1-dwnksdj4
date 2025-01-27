@@ -30,6 +30,7 @@ export interface ObjectConfig {
   fields: Record<string, FormField>;
   formatters?: Record<string, (value: any) => React.ReactNode>;
   validators?: Record<string, (value: any) => string | undefined>;
+  showViewButton?: boolean;
 }
 
 export interface NestedFormData {
