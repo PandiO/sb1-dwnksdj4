@@ -10,8 +10,6 @@ import { testData } from './data/testData';
 import { StructuresManager } from './io/structures';
 
 function App() {
-  const [itemsList, setItemsList] = useState<any[]>([]);
-
   const handleView = (item: any) => {
     console.log('View item:', item);
   };
@@ -23,17 +21,6 @@ function App() {
   const handleDelete = (item: any) => {
     console.log('Delete item:', item);
   };
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      // const items = await StructuresManager.getInstance().getAll().then((data) => {
-      //   console.log(data);
-      //   setItemsList(data);
-      // }).catch((err) => { console.error(err); });
-    };
-
-    fetchItems();
-  }, []);
 
   const tableActions = [
     {
@@ -56,7 +43,20 @@ function App() {
   // Default formatters for common fields
   const defaultFormatters = {
     Created: (value: Date) => value?.toLocaleDateString(),
-    Location: (value: any) => `(${value.x}, ${value.y}, ${value.z})`,
+    LocationCreateDTO: (value: any) => 
+      value ? `(${value.X}, ${value.Y}, ${value.Z})` : '-',
+    WgRegionId: (value: any) => (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        Region #{value}
+      </span>
+    ),
+    AllowEntry: (value: boolean) => (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+        value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }`}>
+        {value ? 'Allowed' : 'Restricted'}
+      </span>
+    ),
   };
 
   return (
@@ -70,36 +70,15 @@ function App() {
             <Route path="/dashboard" element={
               <div className="p-8">
                 <div className="max-w-7xl mx-auto space-y-12">
-                  {/* Towns Table */}
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8">Towns</h2>
-                    <DataTable
-                      data={itemsList}
-                      formatters={{
-                        ...defaultFormatters,
-                        RegionName: (value) => (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {value}
-                          </span>
-                        ),
-                      }}
-                      actions={tableActions}
-                    />
-                  </div>
-
                   {/* Districts Table */}
                   <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Districts</h2>
                     <DataTable
                       data={[testData.districts.northDistrict, testData.districts.southDistrict]}
+                      excludeColumns={['Town', 'TownId']}
                       formatters={{
                         ...defaultFormatters,
-                        RegionName: (value) => (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            {value}
-                          </span>
-                        ),
-                        Town: (value) => value?.Name || '-',
+                        Description: (value) => value || '-',
                       }}
                       actions={tableActions}
                     />
@@ -114,15 +93,10 @@ function App() {
                         testData.structures.structure2,
                         testData.structures.structure3
                       ]}
+                      excludeColumns={['District', 'DistrictId', 'Street', 'StreetId']}
                       formatters={{
                         ...defaultFormatters,
-                        RegionName: (value) => (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {value}
-                          </span>
-                        ),
-                        District: (value) => value?.Name || '-',
-                        Street: (value) => value?.Name || '-',
+                        Description: (value) => value || '-',
                         StreetNumber: (value) => `#${value}`,
                       }}
                       actions={tableActions}
