@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, X } from 'lucide-react';
 import type { FormField, ObjectConfig } from '../types/common';
-import { objectConfigs } from '../config/objectConfigs';
+import { objectConfigs, placeholderConfigs } from '../config/objectConfigs';
 import { SearchableDropdown } from './SearchableDropdown';
 import { MultiSelectDropdown } from './MultiSelectDropdown';
+import { DistrictManager } from '../io/districts';
+import { LocationsManager } from '../io/locations';
+import { StreetManager } from '../io/streets';
 
 interface DynamicFormProps {
   config: ObjectConfig;
@@ -41,17 +44,33 @@ export function DynamicForm({
     // Load relationship data
     Object.entries(config.fields).forEach(([key, field]) => {
       if (field.type === 'object' || field.type === 'array') {
-        // Simulated API call to load relationship data
-        setTimeout(() => {
-          setRelationshipData(prev => ({
-            ...prev,
-            [key]: [
-              { id: '1', name: 'Test Instance 1' },
-              { id: '2', name: 'Test Instance 2' },
-              { id: '3', name: 'Test Instance 3' },
-            ]
-          }));
-        }, 500);
+        switch (field.objectConfig?.type) {
+          case 'district': {
+            DistrictManager.getInstance().getAll().then((data) => {
+              setRelationshipData(prev => ({
+                ...prev,
+                [key]: data.map((o: any) => ({ id: o.id, name: o.name }))
+              }));
+            }).catch((err) => { console.error(err); });
+          }; break;
+          case 'location': { 
+            LocationsManager.getInstance().getAll().then((data) => {
+              setRelationshipData(prev => ({
+                ...prev,
+                [key]: data.map((o: any) => ({ id: o.id, name: 'Location' }))
+              }));
+            }).catch((err) => { console.error(err); });
+          }; break;
+          case 'street': {
+            StreetManager.getInstance().getAll().then((data) => {
+              setRelationshipData(prev => ({
+                ...prev,
+                [key]: data.map((o: any) => ({ id: o.id, name: o.name }))
+              }));
+            }).catch((err) => { console.error(err); });
+          }
+          break;
+        }
       }
     });
   }, [config.fields]);
@@ -78,6 +97,10 @@ export function DynamicForm({
   };
 
   const handleNestedSubmit = (fieldName: string, data: Record<string, any>) => {
+    console.log('Nested form submitted:', fieldName, data);
+    relationshipData[fieldName].push(data);
+
+    data.id = -1;
     handleChange(fieldName, data);
     setNestedForms(prev => ({ ...prev, [fieldName]: false }));
   };
@@ -99,6 +122,8 @@ export function DynamicForm({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('Form submitted:', formData);
+    // isNested && handleNestedSubmit(config.label, formData);
     e.preventDefault();
     
     if (!validateForm()) {
@@ -114,7 +139,7 @@ export function DynamicForm({
   };
 
   const renderField = (name: string, field: FormField) => {
-    const showField = !field.dependsOn || field.dependsOn.every(dep => formData[dep]);
+    const showField = !field.dependsOn || field.dependsOn.every(dep => formData[dep]) || !field.hidden;
 
     if (!showField) return null;
 
@@ -178,7 +203,7 @@ export function DynamicForm({
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                 }
               `}
-              placeholder={field.placeholder}
+              placeholder={placeholderConfigs[field.type as keyof typeof placeholderConfigs].placeholder}
             />
             {errors[name] && (
               <p className="mt-1 text-sm text-red-600">{errors[name]}</p>
@@ -250,12 +275,64 @@ export function DynamicForm({
             )}
           </div>
         )}
+      </div>
+    );
+  };
 
-        {nestedForms[name] && field.objectConfig && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+  return (
+    <>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {isNested ? `Add ${config.label}` : `Create New ${config.label}`}
+            </h2>
+            {isNested && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="px-6 space-y-6">
+          {Object.entries(config.fields).map(([name, field]) => renderField(name, field))}
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            onClick={handleSubmit}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
+            {isNested ? 'Add' : 'Create'}
+          </button>
+        </div>
+      </form>
+
+      {Object.entries(nestedForms).map(([name, isVisible]) => (
+        isVisible && config.fields[name].objectConfig && (
+          <div key={name} className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <DynamicForm
-                config={objectConfigs[field.objectConfig.type]}
+                config={objectConfigs[config.fields[name].objectConfig.type]}
                 initialData={formData[name]}
                 onSubmit={(data) => handleNestedSubmit(name, data)}
                 onCancel={() => setNestedForms(prev => ({ ...prev, [name]: false }))}
@@ -264,55 +341,8 @@ export function DynamicForm({
               />
             </div>
           </div>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {isNested ? `Add ${config.label}` : `Create New ${config.label}`}
-          </h2>
-          {isNested && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="px-6 space-y-6">
-        {Object.entries(config.fields).map(([name, field]) => renderField(name, field))}
-      </div>
-
-      <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4 mr-2" />
-          )}
-          {isNested ? 'Add' : 'Create'}
-        </button>
-      </div>
-    </form>
+        )
+      ))}
+    </>
   );
 }

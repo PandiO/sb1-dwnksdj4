@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { objectConfigs } from '../config/objectConfigs';
 import { DynamicForm } from './DynamicForm';
+import { StructuresManager } from '../io/structures';
+import { StructureCreateDTO, mapFormDataToFields as mapStructureFormDataToFields } from '../utils/domain/dto/StructureCreateDTO';
 
 export function ObjectCreator() {
   const { objectType } = useParams<{ objectType: string }>();
@@ -25,12 +27,22 @@ export function ObjectCreator() {
     return () => clearTimeout(timer);
   }, [objectType, config, navigate]);
 
-  const handleSubmit = async (data: Record<string, any>) => {
+  const handleSubmit = async (data: any) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saved:', data);
-      navigate('/');
+      switch (objectType) {
+        case 'structure': {
+          const structureCreateDTO: StructureCreateDTO = mapStructureFormDataToFields(data);
+          console.log('saving:', structureCreateDTO);
+          StructuresManager.getInstance().create(structureCreateDTO).then((result) => {
+            console.log('Saved:', structureCreateDTO);
+            navigate('/');
+          }).catch((err) => {console.error('Error saving:', err);});
+        }
+        break;
+      }
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      // console.log('Saved:', data);
+      // navigate('/');
     } catch (error) {
       console.error('Error saving:', error);
     }

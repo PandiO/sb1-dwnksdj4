@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Search, Plus, Check, ChevronDown, X } from 'lucide-react';
 
 interface Instance {
@@ -69,7 +70,7 @@ export function MultiSelectDropdown({
       ? selectedIds.filter(id => 
           !filteredInstances.some(instance => instance.id === id)
         )
-      : [...new Set([...selectedIds, ...filteredInstances.map(i => i.id)])];
+      : Array.from(new Set([...selectedIds, ...filteredInstances.map(i => i.id)]));
     onSelect(newSelectedIds);
   };
 

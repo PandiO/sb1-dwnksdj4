@@ -143,7 +143,7 @@ export function DataTable<T extends Record<string, any>>({
       strB.localeCompare(strA);
   };
 
-  const handleSort = useCallback((column: string) => {
+  function handleSort(column: string) {
     setSortState(prevState => {
       const newDirection: SortDirection = 
         prevState.column === column
@@ -159,7 +159,7 @@ export function DataTable<T extends Record<string, any>>({
         direction: newDirection,
       };
     });
-  }, []);
+  };
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortState.column || !sortState.direction) return 0;
