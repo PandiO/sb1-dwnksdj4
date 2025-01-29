@@ -44,6 +44,7 @@ function App() {
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Districts</h2>
                     <DataTable
                       data={[testData.districts.northDistrict, testData.districts.southDistrict]}
+                      type='district'
                       excludeColumns={['Town', 'TownId']}
                       formatters={{
                         ...defaultFormatters,
@@ -61,6 +62,7 @@ function App() {
                         testData.structures.structure2,
                         testData.structures.structure3
                       ]}
+                      type='structure'
                       excludeColumns={['District', 'DistrictId', 'Street', 'StreetId']}
                       formatters={{
                         ...defaultFormatters,

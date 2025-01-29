@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, Trash2, Eye } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -17,29 +17,30 @@ interface ActionItem {
 
 interface DataTableProps<T extends Record<string, any>> {
   data: T[];
+  type: string;
   excludeColumns?: (keyof T)[];
   formatters?: Partial<Record<keyof T, (value: any) => React.ReactNode>>;
-  headers?: Partial<Record<keyof T, string>>;  
+  headers?: Partial<Record<keyof T, string>>;
+  actions?: ActionItem[];
 }
 
 export function DataTable<T extends Record<string, any>>({
   data,
+  type,
   excludeColumns = [],
   formatters = {},
-  headers = {}
+  headers = {},
+  actions = [],
 }: DataTableProps<T>) {
   const [sortState, setSortState] = useState<SortState>({ column: null, direction: null });
+  const [activeMenu, setActiveMenu] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
 
   const handleView = (item: T) => {
-    // Determine the type based on the item's properties
-    let type = 'structure';
-    if ('RequiredTitle' in item) {
-      type = 'town';
-    } else if ('TownId' in item) {
-      type = 'district';
-    }
-    navigate(`/view/${type}/${item.Id}`);
+    console.log('View item:', item);
+    navigate(`/view/${type}/${item.id}`);
   };
 
   const handleEdit = (item: T) => {
@@ -50,7 +51,7 @@ export function DataTable<T extends Record<string, any>>({
     console.log('Delete item:', item);
   };
 
-  const actions: ActionItem[] = [
+  const defaultActions: ActionItem[] = [
     {
       label: 'View',
       onClick: handleView,
@@ -67,6 +68,20 @@ export function DataTable<T extends Record<string, any>>({
       icon: <Trash2 className="h-4 w-4" />,
     },
   ];
+
+
+  const combinedActions: ActionItem[] = [...defaultActions, ...actions];
+
+  useEffect(() => {
+    // const handleClickOutside = (event: MouseEvent) => {
+    //   if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+    //     setActiveMenu(null);
+    //   }
+    // };
+
+    // document.addEventListener('mousedown', handleClickOutside);
+    // return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!data.length) return null;
 
@@ -183,7 +198,7 @@ export function DataTable<T extends Record<string, any>>({
         direction: newDirection,
       };
     });
-  }
+  };
 
   const sortedData = [...data].sort((a, b) => {
     if (!sortState.column || !sortState.direction) return 0;
@@ -208,7 +223,7 @@ export function DataTable<T extends Record<string, any>>({
                 </div>
               </th>
             ))}
-            {actions.length > 0 && (
+            {combinedActions.length > 0 && (
               <th scope="col" className="relative px-6 py-3">
                 <span className="sr-only">Actions</span>
               </th>
@@ -219,7 +234,7 @@ export function DataTable<T extends Record<string, any>>({
           {sortedData.map((item, index) => (
             <tr
               key={index}
-              className="hover:bg-gray-50 transition-colors"
+              className="hover:bg-gray-50 transition-colors relative group"
             >
               {columns.map((column) => (
                 <td
@@ -229,18 +244,36 @@ export function DataTable<T extends Record<string, any>>({
                   {formatValue(column, item[column])}
                 </td>
               ))}
-              {actions.length > 0 && (
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  {actions.map((action, actionIndex) => (
+              {combinedActions.length > 0 && (
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="relative" ref={menuRef}>
                     <button
-                      key={actionIndex}
-                      onClick={() => action.onClick(item)}
-                      className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                      title={action.label}
+                      onClick={() => setActiveMenu(activeMenu === index ? null : index)}
+                      className="invisible group-hover:visible p-2 rounded-full hover:bg-gray-100 transition-colors"
                     >
-                      {action.icon}
+                      <MoreVertical className="h-4 w-4 text-gray-500" />
                     </button>
-                  ))}
+                    {activeMenu === index && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                        <div className="py-1" role="menu">
+                          {combinedActions.map((action, actionIndex) => (
+                            <button
+                              key={actionIndex}
+                              onClick={() => {
+                                action.onClick(item);
+                                setActiveMenu(null);
+                              }}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                              role="menuitem"
+                            >
+                              {action.icon && <span>{action.icon}</span>}
+                              <span>{action.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </td>
               )}
             </tr>

@@ -1,8 +1,8 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ObjectView } from '../components/ObjectView';
 import { objectConfigs } from '../config/objectConfigs';
-import { testData } from '../data/testData';
+import { mapFieldDataToForm as mapStructureFieldDataToForm, StructureViewDTO } from '../utils/domain/dto/StructureViewDTO';
+import { StructuresManager } from '../io/structures';
 
 export function ObjectViewPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -18,18 +18,37 @@ export function ObjectViewPage() {
 
   // In a real application, you would fetch the data based on type and id
   // For now, we'll use the test data
-  const getData = (type: string, id: string) => {
+  const getData = async (type: string, id: string, object?: any) => {
+    if (object) {
+      return object;
+    }
+    var result: any;
     switch (type) {
       case 'district':
-        return Object.values(testData.districts).find(d => d.Id.toString() === id);
+        // DistrictManager.getInstance().getViewById(parseInt(id)).then((data) => {return mapDistrictFieldDataToForm(data)});
+        break;
       case 'structure':
-        return Object.values(testData.structures).find(s => s.Id.toString() === id);
+        StructuresManager.getInstance().getViewById(parseInt(id)).then((data) => {
+          console.log("Results: ", data);
+          result = data as any;
+        }).catch((err) => { console.log(err)});
+        break;
+      case 'town':	
+        // return dataManager = TownManager.getInstance();
+        break;
+      case 'street':
+        // return dataManager = StreetManager.getInstance();
+        break;
+      case 'location':
+        // return dataManager = LocationManager.getInstance();
+        break;
       default:
         return null;
     }
+    return result;
   };
 
-  const data = getData(type, id);
+  const data =  getData(type, id);
   if (!data) {
     return <div>Object not found</div>;
   }
