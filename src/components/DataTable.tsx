@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -40,7 +40,7 @@ export function DataTable<T extends Record<string, any>>({
 
   const handleView = (item: T) => {
     console.log('View item:', item);
-    navigate(`/view/${type}/${item.id}`);
+    navigate(`/view/${type}/${item.id}`, { state: { object: item}});
   };
 
   const handleEdit = (item: T) => {

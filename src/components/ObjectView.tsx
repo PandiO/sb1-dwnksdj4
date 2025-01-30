@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ExternalLink } from 'lucide-react';
 import { objectConfigs } from '../config/objectConfigs';
 

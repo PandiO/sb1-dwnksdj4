@@ -1,11 +1,13 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ObjectView } from '../components/ObjectView';
 import { objectConfigs } from '../config/objectConfigs';
 import { mapFieldDataToForm as mapStructureFieldDataToForm, StructureViewDTO } from '../utils/domain/dto/StructureViewDTO';
 import { StructuresManager } from '../io/structures';
 
 export function ObjectViewPage() {
-  const { type, id } = useParams<{ type: string; id: string }>();
+  const { type, id } = useParams<{ type: string; id: string, object?: any }>();
+  const location = useLocation();
+  const { object } = location.state || {};
 
   if (!type || !id) {
     return <div>Invalid parameters</div>;
@@ -18,11 +20,11 @@ export function ObjectViewPage() {
 
   // In a real application, you would fetch the data based on type and id
   // For now, we'll use the test data
-  const getData = async (type: string, id: string, object?: any) => {
+  const getData = async (type: string, id: string) => {
     if (object) {
       return object;
     }
-    var result: any;
+    var result: any = object;
     switch (type) {
       case 'district':
         // DistrictManager.getInstance().getViewById(parseInt(id)).then((data) => {return mapDistrictFieldDataToForm(data)});
