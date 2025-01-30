@@ -6,6 +6,8 @@ import { LandingPage } from './pages/LandingPage';
 import { ObjectViewPage } from './pages/ObjectViewPage';
 import { DataTable } from './components/DataTable';
 import { testData } from './data/testData';
+import { mapFieldDataToForm as mapStructureFieldDataToForm } from './utils/domain/dto/StructureViewDTO';
+import { mapFieldDataToForm as mapDistrictFieldDataToForm } from './utils/domain/dto/DistrictViewDTO';
 
 function App() {
   // Default formatters for common fields
@@ -43,9 +45,8 @@ function App() {
                   <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Districts</h2>
                     <DataTable
-                      data={[testData.districts.northDistrict, testData.districts.southDistrict]}
+                      data={[testData.districts.northDistrict, testData.districts.southDistrict].map(mapDistrictFieldDataToForm)}
                       type='district'
-                      excludeColumns={['Town', 'TownId']}
                       formatters={{
                         ...defaultFormatters,
                         Description: (value) => value || '-'
@@ -61,9 +62,8 @@ function App() {
                         testData.structures.structure1,
                         testData.structures.structure2,
                         testData.structures.structure3
-                      ]}
+                      ].map(mapStructureFieldDataToForm)}
                       type='structure'
-                      excludeColumns={['District', 'DistrictId', 'Street', 'StreetId']}
                       formatters={{
                         ...defaultFormatters,
                         Description: (value) => value || '-'
