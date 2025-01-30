@@ -49,6 +49,40 @@ export function ObjectView({ data, config }: ObjectViewProps) {
   const renderRelatedEntity = (key: string, value: any, field: any) => {
     if (!value) return null;
 
+    // Special handling for Street field in Structure view
+    if (key === 'street' && value.streetNumber !== undefined) {
+      return (
+        <div key={key} className="mt-8">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            {field.label} Information
+          </h3>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-1">
+                <dt className="text-sm font-medium text-gray-500">Name</dt>
+                <dd className="mt-1 text-sm text-gray-900">{value.name}</dd>
+              </div>
+              <div className="sm:col-span-1">
+                <dt className="text-sm font-medium text-gray-500">Street Number</dt>
+                <dd className="mt-1 text-sm text-gray-900">#{value.streetNumber}</dd>
+              </div>
+            </dl>
+            {field.showViewButton !== false && (
+              <div className="mt-4">
+                <button
+                  onClick={() => navigate(`/view/${field.objectConfig.type}/${value.id}`)}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  View Details
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     const entityConfig = field.objectConfig;
     if (!entityConfig) return null;
 
