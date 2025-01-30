@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 type SortDirection = 'asc' | 'desc' | null;
 

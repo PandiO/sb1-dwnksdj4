@@ -60,7 +60,9 @@ export function ObjectViewPage() {
 
         switch (type) {
           case 'structure':
-            data = await StructuresManager.getInstance().getViewById(numericId);
+            await StructuresManager.getInstance().getViewById(numericId).then((result) => {
+              data = result;
+            }).catch((err) => {setFetchState({data: null, loading: false, error: err})});
             break;
           // Add other cases as they are implemented
           default:
