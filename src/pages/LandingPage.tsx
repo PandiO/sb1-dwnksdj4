@@ -6,14 +6,14 @@ import { ImageUploadModal } from '../components/ImageUploadModal';
 const DEMO_IMAGES = [
   {
     id: '1',
-    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+    url: 'https://www.dropbox.com/scl/fi/lamvulvwv126hxfwl7lat/1.jpg?rlkey=ff5h3fsy88mq2se5kwmahhhyq&st=x3p9libg&dl=0',
     title: 'Yosemite Valley',
     photographer: 'Bailey Zindel',
     description: 'Sunrise at Yosemite National Park'
   },
   {
     id: '2',
-    url: 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6',
+    url: 'https://www.dropbox.com/scl/fi/1p2mehhfy13vptq0q9dhh/Forrestview_south-west_Cinix_noon.jpg?rlkey=xq2jb0r70l8wuuclpn4cr0jxz&st=1xlm521l&dl=0',
     title: 'Northern Lights',
     photographer: 'Jonatan Pie',
     description: 'Aurora Borealis in Iceland'
