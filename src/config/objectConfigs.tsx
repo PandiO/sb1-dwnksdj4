@@ -168,6 +168,22 @@ const structureConfig: ObjectConfig = {
   type: 'structure',
   label: 'Structure',
   icon: <Building2 className="h-5 w-5" />,
+  fieldDisplayConfig: {
+    District: {
+      fieldDisplayMode: 'all',
+      fields: {
+        Town: {
+          fieldDisplayMode: 'idAndName'
+        }
+      }
+    },
+    Street: {
+      fieldDisplayMode: 'idAndName'
+    },
+    Location: {
+      fieldDisplayMode: 'all'
+    }
+  },
   fields: {
     ...dominionConfig.fields,
     district: {
