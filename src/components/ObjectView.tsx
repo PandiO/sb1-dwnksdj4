@@ -3,10 +3,30 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ExternalLink, ChevronDown, ChevronRight, MapPin, Building2, Home, Brackets, Hash, Database } from 'lucide-react';
 import { objectConfigs } from '../config/objectConfigs';
 
+interface TypeBadgeProps {
+  type: string;
+  count?: number;
+}
+
+function TypeBadge({ type, count }: TypeBadgeProps) {
+  return (
+    <span className="ml-2 inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
+      {type}
+      {count !== undefined && (
+        <span className="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-full">
+          {count}
+        </span>
+      )}
+    </span>
+  );
+}
+
 interface CollapsibleSectionProps {
   title: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
+  type?: string;
+  count?: number;
   defaultExpanded?: boolean;
 }
 
