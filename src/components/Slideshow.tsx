@@ -5,8 +5,8 @@ interface Image {
   id: string;
   url: string;
   title: string;
-  photographer: string;
-  description: string;
+  // photographer: string;
+  // description: string;
 }
 
 interface SlideshowProps {
@@ -94,10 +94,10 @@ export function Slideshow({ images, interval = 6000 }: SlideshowProps) {
           <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent text-white">
             <div className="max-w-7xl mx-auto">
               <h2 className="text-2xl font-bold mb-2">{image.title}</h2>
-              <p className="text-sm opacity-90 mb-1">
+                {/* <p className="text-sm opacity-90 mb-1">
                 Photographed by {image.photographer}
-              </p>
-              <p className="text-sm opacity-75">{image.description}</p>
+                </p>
+                <p className="text-sm opacity-75">{image.description}</p> */}
             </div>
           </div>
         </div>
