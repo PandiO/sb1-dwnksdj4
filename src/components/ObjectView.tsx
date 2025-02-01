@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, ExternalLink, ChevronDown, ChevronRight, MapPin, Building2, Home, Brackets, Hash, Database } from 'lucide-react';
 import { objectConfigs } from '../config/objectConfigs';
+import { ObjectConfig } from '../types/common';
 
 interface TypeBadgeProps {
   type: string;
