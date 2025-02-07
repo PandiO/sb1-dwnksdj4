@@ -45,7 +45,7 @@ function App() {
                   <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Districts</h2>
                     <DataTable
-                      data={[testData.districts.northDistrict, testData.districts.southDistrict].map(mapDistrictFieldDataToForm)}
+                      data={testData.districts.map(mapDistrictFieldDataToForm)}
                       type='district'
                       formatters={{
                         ...defaultFormatters,
@@ -58,11 +58,7 @@ function App() {
                   <div>
                     <h2 className="text-3xl font-bold text-gray-900 mb-8">Structures</h2>
                     <DataTable
-                      data={[
-                        testData.structures.structure1,
-                        testData.structures.structure2,
-                        testData.structures.structure3
-                      ].map(mapStructureFieldDataToForm)}
+                      data={testData.structures.map(mapStructureFieldDataToForm)}
                       type='structure'
                       formatters={{
                         ...defaultFormatters,

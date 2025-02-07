@@ -1,145 +1,178 @@
-import { LocationCreateDTO, iLocationCreateDTO } from '../utils/domain/dto/LocationCreateDTO';
-import { DominionCreateDTO } from '../utils/domain/dto/DominionCreateDTO';
-import { TownCreateDTO } from '../utils/domain/dto/TownCreateDTO';
-import { DistrictCreateDTO } from '../utils/domain/dto/DistrictCreateDTO';
-import { StreetCreateDTO } from '../utils/domain/dto/StreetCreateDTO';
-import { StructureCreateDTO } from '../utils/domain/dto/StructureCreateDTO';
+import { LocationViewDTO } from '../utils/domain/dto/LocationViewDTO';
+import { StreetViewDTO } from '../utils/domain/dto/StreetViewDTO';
+import { DistrictViewDTO } from '../utils/domain/dto/DistrictViewDTO';
+import { TownViewDTO } from '../utils/domain/dto/TownViewDTO';
+import { StructureViewDTO, StructureStreetViewDTO } from '../utils/domain/dto/StructureViewDTO';
 
-// Basic location for reuse
-const createLocation = (id: number, x: number, y: number, z: number, yaw: number = 0, pitch: number = 0): iLocationCreateDTO => ({
-  Id: id,
-  X: x,
-  Y: y,
-  Z: z,
-  Yaw: yaw,
-  Pitch: pitch,
-  WorldName: 'world'
-});
+// Create LocationViewDTO instances
+const locations: LocationViewDTO[] = [
+  {
+    Id: 1,
+    X: 245,
+    Y: 64,
+    Z: -128,
+    Pitch: 0,
+    Yaw: 180,
+    WorldName: 'world'
+  },
+  {
+    Id: 2,
+    X: 312,
+    Y: 67,
+    Z: -156,
+    Pitch: 15,
+    Yaw: 90,
+    WorldName: 'world'
+  },
+  {
+    Id: 3,
+    X: 198,
+    Y: 65,
+    Z: -142,
+    Pitch: 0,
+    Yaw: 270,
+    WorldName: 'world'
+  },
+  {
+    Id: 4,
+    X: 275,
+    Y: 68,
+    Z: -134,
+    Pitch: 30,
+    Yaw: 45,
+    WorldName: 'world'
+  }
+];
 
-// Create Streets
-const mainStreet: StreetCreateDTO = {
+// Create TownViewDTO instance
+const town: TownViewDTO = {
   Id: 1,
-  Name: "Main Street",
-  DistrictId: undefined, // Will be set after district creation
-  District: undefined
-};
-
-const highStreet: StreetCreateDTO = {
-  Id: 2,
-  Name: "High Street",
-  DistrictId: undefined,
-  District: undefined
-};
-
-// Create Town
-const town: TownCreateDTO = {
-  Id: 1,
-  Name: "Riverside",
-  Description: "A peaceful town by the river",
-  Created: new Date("2024-03-15T10:00:00Z"),
-  LocationId: 1,
-  LocationCreateDTO: createLocation(1, 100, 64, 100),
+  Name: "Silverbrook",
+  Description: "A prosperous medieval town nestled in a scenic valley",
   AllowEntry: true,
-  WgRegionId: 1,
-  RequiredTitle: 1
+  Created: new Date("2024-01-15T08:00:00Z"),
+  WgRegionId: 1001,
+  Location: locations[0],
+  RequiredTitle: 2
 };
 
-// Create Districts
-const northDistrict: DistrictCreateDTO = {
-  Id: 2,
-  Name: "North District",
-  Description: "The northern residential area",
-  Created: new Date("2024-03-15T10:30:00Z"),
-  LocationId: 2,
-  LocationCreateDTO: createLocation(2, 150, 64, 50),
-  AllowEntry: true,
-  WgRegionId: 2,
-  TownId: town.Id,
-  Town: town
-};
+// Create DistrictViewDTO instances
+const districts: DistrictViewDTO[] = [
+  {
+    Id: 1,
+    Name: "Merchant Quarter",
+    Description: "The bustling commercial heart of Silverbrook",
+    AllowEntry: true,
+    Created: new Date("2024-01-15T09:00:00Z"),
+    WgRegionId: 2001,
+    Location: locations[1],
+    Town: town,
+    Streets: [], // Will be populated after street creation
+    StreetNames: new Map([
+      [1, "Market Street"],
+      [2, "Guild Row"]
+    ])
+  },
+  {
+    Id: 2,
+    Name: "Noble District",
+    Description: "An elegant residential area for the town's elite",
+    AllowEntry: false,
+    Created: new Date("2024-01-15T09:30:00Z"),
+    WgRegionId: 2002,
+    Location: locations[2],
+    Town: town,
+    Streets: [], // Will be populated after street creation
+    StreetNames: new Map([
+      [3, "High Street"],
+      [4, "Royal Avenue"]
+    ])
+  }
+];
 
-const southDistrict: DistrictCreateDTO = {
-  Id: 3,
-  Name: "South District",
-  Description: "The southern commercial district",
-  Created: new Date("2024-03-15T11:00:00Z"),
-  LocationId: 3,
-  LocationCreateDTO: createLocation(3, 50, 64, 150),
-  AllowEntry: true,
-  WgRegionId: 3,
-  TownId: town.Id,
-  Town: town
-};
+// Create StreetViewDTO instances
+const streets: StreetViewDTO[] = [
+  {
+    Id: 1,
+    Name: "Market Street"
+  },
+  {
+    Id: 2,
+    Name: "Guild Row"
+  },
+  {
+    Id: 3,
+    Name: "High Street"
+  },
+  {
+    Id: 4,
+    Name: "Royal Avenue"
+  }
+];
 
-// Update street district references
-mainStreet.DistrictId = northDistrict.Id;
-mainStreet.District = northDistrict;
-highStreet.DistrictId = southDistrict.Id;
-highStreet.District = southDistrict;
+// Update districts with their streets
+districts[0].Streets = [streets[0], streets[1]];
+districts[1].Streets = [streets[2], streets[3]];
 
-// Create Structures
-const structure1: StructureCreateDTO = {
-  Id: 4,
-  Name: "Town Hall",
-  Description: "The central administrative building",
-  Created: new Date("2024-03-15T12:00:00Z"),
-  LocationId: 4,
-  LocationCreateDTO: createLocation(4, 155, 64, 55),
-  AllowEntry: true,
-  WgRegionId: 4,
-  DistrictId: northDistrict.Id,
-  District: northDistrict,
-  StreetId: mainStreet.Id,
-  Street: mainStreet,
-  StreetNumber: 1
-};
+// Create StructureStreetViewDTO instances
+const structureStreets: StructureStreetViewDTO[] = [
+  {
+    Id: 1,
+    Name: "Market Street",
+    Districts: new Map([[1, "Merchant Quarter"]])
+  },
+  {
+    Id: 3,
+    Name: "High Street",
+    Districts: new Map([[2, "Noble District"]])
+  }
+];
 
-const structure2: StructureCreateDTO = {
-  Id: 5,
-  Name: "Market",
-  Description: "The main marketplace",
-  Created: new Date("2024-03-15T12:30:00Z"),
-  LocationId: 5,
-  LocationCreateDTO: createLocation(5, 45, 64, 145),
-  AllowEntry: true,
-  WgRegionId: 5,
-  DistrictId: southDistrict.Id,
-  District: southDistrict,
-  StreetId: highStreet.Id,
-  Street: highStreet,
-  StreetNumber: 2
-};
-
-const structure3: StructureCreateDTO = {
-  Id: 6,
-  Name: "Library",
-  Description: "Public library and archive",
-  Created: new Date("2024-03-15T13:00:00Z"),
-  LocationId: 6,
-  LocationCreateDTO: createLocation(6, 160, 64, 60),
-  AllowEntry: true,
-  WgRegionId: 6,
-  DistrictId: northDistrict.Id,
-  District: northDistrict,
-  StreetId: mainStreet.Id,
-  Street: mainStreet,
-  StreetNumber: 3
-};
+// Create StructureViewDTO instances
+const structures: StructureViewDTO[] = [
+  {
+    Id: 1,
+    Name: "Grand Marketplace",
+    Description: "The central trading hub of Silverbrook",
+    AllowEntry: true,
+    Created: new Date("2024-01-16T10:00:00Z"),
+    WgRegionId: 3001,
+    Location: locations[1],
+    Street: structureStreets[0],
+    StreetNumber: 1,
+    District: districts[0]
+  },
+  {
+    Id: 2,
+    Name: "Noble Manor",
+    Description: "An impressive mansion with ornate architecture",
+    AllowEntry: false,
+    Created: new Date("2024-01-16T11:00:00Z"),
+    WgRegionId: 3002,
+    Location: locations[2],
+    Street: structureStreets[1],
+    StreetNumber: 15,
+    District: districts[1]
+  },
+  {
+    Id: 3,
+    Name: "Craftsmen's Guild Hall",
+    Description: "Headquarters of the town's artisan guilds",
+    AllowEntry: true,
+    Created: new Date("2024-01-16T12:00:00Z"),
+    WgRegionId: 3003,
+    Location: locations[3],
+    Street: structureStreets[0],
+    StreetNumber: 8,
+    District: districts[0]
+  }
+];
 
 // Export all created objects
 export const testData = {
+  locations,
   town,
-  districts: {
-    northDistrict,
-    southDistrict
-  },
-  streets: {
-    mainStreet,
-    highStreet
-  },
-  structures: {
-    structure1,
-    structure2,
-    structure3
-  }
+  districts,
+  streets,
+  structures
 };
