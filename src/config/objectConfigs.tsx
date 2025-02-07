@@ -128,22 +128,11 @@ const townConfig: ObjectConfig = {
   },
   formatters: dominionConfig.formatters
 };
-
-const districtConfig: ObjectConfig = {
-  type: 'district',
-  label: 'District',
-  icon: <MapPin className="h-5 w-5" />,
-  fields: {
-    ...dominionConfig.fields,
-    town: {
-      name: 'Town',
-      label: 'Town',
-      type: 'object',
-      required: true,
-      objectConfig: townConfig
-    },
-  },
-  formatters: dominionConfig.formatters
+let districtConfig: ObjectConfig = {
+  type: '',
+  label: '',
+  icon: undefined,
+  fields: {}
 };
 
 const streetConfig: ObjectConfig = {
@@ -159,6 +148,34 @@ const streetConfig: ObjectConfig = {
       type: 'object',
       required: true,
       objectConfig: districtConfig
+    }
+  },
+  formatters: dominionConfig.formatters
+};
+
+districtConfig = {
+  type: 'district',
+  label: 'District',
+  icon: <MapPin className="h-5 w-5" />,
+  fields: {
+    ...dominionConfig.fields,
+    town: {
+      name: 'Town',
+      label: 'Town',
+      type: 'object',
+      required: true,
+      objectConfig: townConfig
+    },
+    streets: {
+      name: 'Streets',
+      label: 'Streets',
+      type: 'array',
+      objectConfig: streetConfig
+    },
+    streetNames: {
+      name: 'StreetNames',
+      label: 'Streets',
+      type: 'array'
     }
   },
   formatters: dominionConfig.formatters

@@ -98,7 +98,7 @@ function RelatedEntity({ title, icon, data, fields, fieldDisplayMode = 'all', on
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {Object.entries(data).map(([key, value]) => {
             const field = fields[key];
-            if (!field || !shouldShowField(key) || typeof value === 'object' || Array.isArray(value)) return null;
+            if (!field || !shouldShowField(key)) return null;
 
             return (
               <div key={key} className="sm:col-span-1">
