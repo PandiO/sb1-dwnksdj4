@@ -4,6 +4,7 @@ import { Navigation } from './components/Navigation';
 import { ObjectCreator } from './components/ObjectCreator';
 import { LandingPage } from './pages/LandingPage';
 import { ObjectViewPage } from './pages/ObjectViewPage';
+import { StructureOverviewPage } from './pages/StructureOverviewPage';
 import { DataTable } from './components/DataTable';
 import { testData } from './data/testData';
 import { mapFieldDataToForm as mapStructureFieldDataToForm } from './utils/domain/dto/structure/StructureViewDTO';
@@ -38,6 +39,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/create/:objectType" element={<ObjectCreator />} />
             <Route path="/view/:type/:id" element={<ObjectViewPage />} />
+            <Route path="/structure-overview" element={<StructureOverviewPage />} />
             <Route path="/dashboard" element={
               <div className="p-8">
                 <div className="max-w-7xl mx-auto space-y-12">
