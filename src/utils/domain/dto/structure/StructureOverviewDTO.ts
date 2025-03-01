@@ -1,3 +1,10 @@
+import { FilterType, StructureOverviewFilter } from "../../../enums";
+
+export interface StructureOverviewArgumentsDTO {
+  filters: Map<StructureOverviewFilter, number[]>;
+  filterType: FilterType;
+}
+
 export interface StructureOverviewDTO {
   id: number;
   name: string;
