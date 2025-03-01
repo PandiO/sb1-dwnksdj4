@@ -4,6 +4,7 @@ import { StructuresManager } from '../io/structures';
 import { StructureOverviewDTO } from '../utils/domain/dto/structure/StructureOverviewDTO';
 import { FilterType, StructureOverviewFilter } from '../utils/enums';
 import { useNavigate } from 'react-router-dom';
+import { mapFieldDataToForm as mapStructureFieldDataToForm } from '../utils/domain/dto/structure/StructureOverviewDTO';
 
 export function StructureOverviewPage() {
   const [structures, setStructures] = useState<StructureOverviewDTO[]>([]);
@@ -20,7 +21,7 @@ export function StructureOverviewPage() {
         };
         
         const data = await StructuresManager.getInstance().getOverview(parameters);
-        setStructures(data);
+        setStructures(data.map(mapStructureFieldDataToForm));
       } catch (err) {
         setError('Failed to load structures');
         console.error('Error fetching structures:', err);

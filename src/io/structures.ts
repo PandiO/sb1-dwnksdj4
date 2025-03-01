@@ -29,7 +29,7 @@ export class StructuresManager extends ObjectManager {
     }
 
     getOverview(parameters: StructureOverviewArgumentsDTO): Promise<any> {
-        return this.invokeServiceCall(parameters, StructuresOperation.GetOverview, Controllers.Structures, HttpMethod.Get);
+        return this.invokeServiceCall(parameters, StructuresOperation.GetOverview, Controllers.Structures, HttpMethod.Post);
     }
     // invokeServiceCall(data: any, operation: string, controller: string, httpMethod: string): Promise<any> {
     //     return new Promise((resolve, reject) => {
