@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, MapPin, Home, Package, User } from 'lucide-react';
+import { Building2, MapPin, Home, Package, User, Box, Database, Archive } from 'lucide-react';
 import type { FormField, ObjectConfig } from '../types/common';
 import type { Location } from '../types/Location';
 
@@ -181,6 +181,236 @@ districtConfig = {
   formatters: dominionConfig.formatters
 };
 
+const itemConfig: ObjectConfig = {
+  type: 'item',
+  label: 'Item',
+  icon: <Package className="h-5 w-5" />,
+  fields: {
+    id: commonFields.id,
+    name: {
+      name: 'name',
+      label: 'Name',
+      type: 'text',
+      required: true,
+      validation: (value) => {
+        if (!value || value.length < 2) return 'Name must be at least 2 characters';
+      }
+    },
+    displayName: {
+      name: 'displayName',
+      label: 'Display Name',
+      type: 'text',
+      required: true
+    },
+    basePrice: {
+      name: 'basePrice',
+      label: 'Base Price',
+      type: 'number',
+      required: true,
+      defaultValue: 1,
+      validation: (value) => {
+        if (value < 0) return 'Base price cannot be negative';
+      }
+    },
+    categoryId: {
+      name: 'categoryId',
+      label: 'Category',
+      type: 'number',
+      required: true
+    },
+    gradeId: {
+      name: 'gradeId',
+      label: 'Grade',
+      type: 'number',
+      required: true
+    },
+    itemtypeId: {
+      name: 'itemtypeId',
+      label: 'Item Type',
+      type: 'number',
+      required: true
+    },
+    itemtypeName: {
+      name: 'itemtypeName',
+      label: 'Item Type Name',
+      type: 'text',
+      required: true
+    },
+    blockData: {
+      name: 'blockData',
+      label: 'Block Data',
+      type: 'text',
+      required: false
+    },
+    data: {
+      name: 'data',
+      label: 'Data',
+      type: 'number',
+      required: false,
+      defaultValue: 0
+    }
+  },
+  formatters: {
+    basePrice: (value) => `${value.toFixed(2)} coins`,
+    displayName: (value) => (
+      <span className="font-minecraft">{value.replace(/§[0-9a-fk-or]/g, '')}</span>
+    ),
+    itemtypeName: (value) => (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        {value}
+      </span>
+    )
+  }
+};
+
+const storageItemConfig: ObjectConfig = {
+  type: 'storageItem',
+  label: 'Storage Item',
+  icon: <Box className="h-5 w-5" />,
+  fields: {
+    storageId: {
+      name: 'storageId',
+      label: 'Storage',
+      type: 'number',
+      required: true
+    },
+    itemId: {
+      name: 'itemId',
+      label: 'Item',
+      type: 'number',
+      required: true
+    },
+    amount: {
+      name: 'amount',
+      label: 'Amount',
+      type: 'number',
+      required: true,
+      defaultValue: 0,
+      validation: (value) => {
+        if (value < 0) return 'Amount cannot be negative';
+      }
+    },
+    item: {
+      name: 'item',
+      label: 'Item Details',
+      type: 'object',
+      required: true,
+      objectConfig: itemConfig
+    }
+  },
+  formatters: {
+    amount: (value) => value.toLocaleString()
+  }
+};
+
+const storageConfig: ObjectConfig = {
+  type: 'storage',
+  label: 'Storage',
+  icon: <Database className="h-5 w-5" />,
+  fields: {
+    id: commonFields.id,
+    name: commonFields.name,
+    capacityMax: {
+      name: 'capacityMax',
+      label: 'Maximum Capacity',
+      type: 'number',
+      required: true,
+      validation: (value) => {
+        if (value <= 0) return 'Maximum capacity must be greater than 0';
+      }
+    },
+    capacity: {
+      name: 'capacity',
+      label: 'Current Capacity',
+      type: 'number',
+      required: true,
+      defaultValue: 0
+    },
+    itemAmountMax: {
+      name: 'itemAmountMax',
+      label: 'Maximum Items',
+      type: 'number',
+      required: true,
+      validation: (value) => {
+        if (value <= 0) return 'Maximum items must be greater than 0';
+      }
+    },
+    itemAmount: {
+      name: 'itemAmount',
+      label: 'Current Items',
+      type: 'number',
+      required: true,
+      defaultValue: 0
+    },
+    structureId: {
+      name: 'structureId',
+      label: 'Structure',
+      type: 'number',
+      required: false
+    },
+    structureName: {
+      name: 'structureName',
+      label: 'Structure Name',
+      type: 'text',
+      required: false
+    },
+    userId: {
+      name: 'userId',
+      label: 'User',
+      type: 'text',
+      required: false
+    },
+    userName: {
+      name: 'userName',
+      label: 'User Name',
+      type: 'text',
+      required: false
+    },
+    contents: {
+      name: 'contents',
+      label: 'Contents',
+      type: 'array',
+      required: false,
+      objectConfig: storageItemConfig
+    }
+  },
+  formatters: {
+    capacity: (value, item) => {
+      const max = item.capacityMax;
+      const percentage = (value / max) * 100;
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${
+                percentage > 90 ? 'bg-red-500' :
+                percentage > 70 ? 'bg-yellow-500' :
+                'bg-green-500'
+              }`}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+          <span className="text-sm text-gray-600">
+            {value.toLocaleString()} / {max.toLocaleString()}
+          </span>
+        </div>
+      );
+    },
+    itemAmount: (value, item) => {
+      const max = item.itemAmountMax;
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          value >= max ? 'bg-red-100 text-red-800' :
+          value >= max * 0.8 ? 'bg-yellow-100 text-yellow-800' :
+          'bg-green-100 text-green-800'
+        }`}>
+          {value} / {max} items
+        </span>
+      );
+    }
+  }
+};
+
 const structureConfig: ObjectConfig = {
   type: 'structure',
   label: 'Structure',
@@ -226,6 +456,13 @@ const structureConfig: ObjectConfig = {
         if (value < 1) return 'Street number must be positive';
       }
     },
+    storages: {
+      name: 'storages',
+      label: 'Storages',
+      type: 'array',
+      required: false,
+      objectConfig: storageConfig
+    }
   },
   formatters: {
     ...dominionConfig.formatters,
@@ -240,74 +477,9 @@ export const objectConfigs: Record<string, ObjectConfig> = {
   district: districtConfig,
   structure: structureConfig,
   street: streetConfig,
-  item: {
-    type: 'item',
-    label: 'Item',
-    icon: <Package className="h-5 w-5" />,
-    fields: {
-      Name: {
-        name: 'Name',
-        label: 'Name',
-        type: 'text',
-        required: true,
-        validation: (value) => {
-          if (!/^[a-z0-9-]+$/.test(value)) {
-            return 'Name must contain only lowercase letters, numbers, and hyphens';
-          }
-        }
-      },
-      DisplayName: {
-        name: 'DisplayName',
-        label: 'Display Name',
-        type: 'text',
-        required: true
-      },
-      CategoryId: {
-        name: 'CategoryId',
-        label: 'Category',
-        type: 'select',
-        required: true,
-        options: [
-          { label: 'Electronics', value: '1' },
-          { label: 'Furniture', value: '2' },
-          { label: 'Books', value: '3' }
-        ]
-      },
-      BaseItemName: {
-        name: 'BaseItemName',
-        label: 'Base Item Name',
-        type: 'text',
-        required: true
-      },
-      BasePrice: {
-        name: 'BasePrice',
-        label: 'Base Price',
-        type: 'number',
-        required: true,
-        validation: (value) => {
-          if (value < 0) return 'Price cannot be negative';
-        }
-      },
-      Price: {
-        name: 'Price',
-        label: 'Sale Price',
-        type: 'number',
-        required: true,
-        validation: (value) => {
-          if (value < 0) return 'Price cannot be negative';
-        }
-      }
-    },
-    formatters: {
-      CategoryName: (value) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {value}
-        </span>
-      ),
-      BasePrice: (value) => `$${value.toFixed(2)}`,
-      Price: (value) => `$${value.toFixed(2)}`
-    }
-  },
+  item: itemConfig,
+  storageItem: storageItemConfig,
+  storage: storageConfig,
   user: {
     type: 'user',
     label: 'User',
