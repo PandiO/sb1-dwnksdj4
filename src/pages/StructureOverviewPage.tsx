@@ -71,7 +71,7 @@ export function StructureOverviewPage() {
           <div
             key={structure.id}
             className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => navigate(`/view/structure/${structure.id}`)}
+            onClick={() => navigate(`/structure/${structure.id}`)}
           >
             <div className="p-6">
               <div className="flex items-start justify-between">

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ObjectCreator } from './components/ObjectCreator';
 import { LandingPage } from './pages/LandingPage';
+import { StructureDetailsPage } from './pages/StructureDetailsPage';
 import { ObjectViewPage } from './pages/ObjectViewPage';
 import { StructureOverviewPage } from './pages/StructureOverviewPage';
 import { DataTable } from './components/DataTable';
@@ -38,6 +39,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/create/:objectType" element={<ObjectCreator />} />
+            <Route path="/structure/:id" element={<StructureDetailsPage />} />
             <Route path="/view/:type/:id" element={<ObjectViewPage />} />
             <Route path="/structure-overview" element={<StructureOverviewPage />} />
             <Route path="/dashboard" element={
