@@ -2,16 +2,16 @@ import { LocationViewDTO } from "../location/LocationViewDTO";
 import { mapFieldDataToForm as mapLocationFieldDataToForm } from "../location/LocationViewDTO";
 
 export interface DominionViewDTO {
-    Id: number;
-    Name: string;
-    Description: string;
-    AllowEntry: boolean;
-    Created: Date;
-    WgRegionId: number;
-    Location: LocationViewDTO;
+    id: number;
+    name: string;
+    description: string;
+    allowEntry: boolean;
+    created: Date | null;
+    wgRegionId: number;
+    location: LocationViewDTO;
 }
 
-export function mapFieldDataToForm(data: DominionViewDTO): any {
+export function mapFieldDataToForm(data: any): DominionViewDTO | null {
     if (!data) return null;
     
     return {
@@ -21,6 +21,6 @@ export function mapFieldDataToForm(data: DominionViewDTO): any {
         allowEntry: data.AllowEntry,
         created: data.Created ? new Date(data.Created) : null,
         wgRegionId: data.WgRegionId,
-        location: data.Location ? mapLocationFieldDataToForm(data.Location) : null
+        location: mapLocationFieldDataToForm(data.Location)
     };
 }

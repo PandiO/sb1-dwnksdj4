@@ -33,8 +33,8 @@ export function SearchableDropdown({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredInstances = instances.filter(instance =>
-    instance.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInstances = instances?.filter(instance =>
+    instance?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedInstance = instances.find(instance => instance.id == selectedId);

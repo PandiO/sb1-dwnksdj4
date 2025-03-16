@@ -1,7 +1,7 @@
 // Global configuration settings
 export const appConfig = {
   // When true, uses test data instead of making API calls
-  useTestData: true,
+  useTestData: false,
   
   // API configuration
   api: {

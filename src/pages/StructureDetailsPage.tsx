@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Building2, MapPin, Home, Package, Database } from 'lucide-react';
 import { StructuresManager } from '../io/structures';
 import { StructureViewDTO } from '../utils/domain/dto/structure/StructureViewDTO';
+import { mapFieldDataToForm as mapStructureFieldDataToForm } from '../utils/domain/dto/structure/StructureViewDTO';
 
 export function StructureDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,7 @@ export function StructureDetailsPage() {
       try {
         if (!id) throw new Error('No structure ID provided');
         const data = await StructuresManager.getInstance().getViewById(parseInt(id));
-        setStructure(data);
+        setStructure(mapStructureFieldDataToForm(data));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load structure details');
       } finally {
@@ -70,13 +71,13 @@ export function StructureDetailsPage() {
             <Building2 className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {structure.Name}
+                {structure.name}
                 <span className="ml-3 text-lg font-normal text-gray-500">
-                  (ID: {structure.Id})
+                  (ID: {structure.id})
                 </span>
               </h1>
-              {structure.Description && (
-                <p className="mt-1 text-gray-600">{structure.Description}</p>
+              {structure.description && (
+                <p className="mt-1 text-gray-600">{structure.description}</p>
               )}
             </div>
           </div>
@@ -95,37 +96,37 @@ export function StructureDetailsPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Coordinates</div>
                   <div className="mt-1 text-gray-900">
-                    X: {structure.Location.X}, Y: {structure.Location.Y}, Z: {structure.Location.Z}
+                    X: {structure.location.x}, Y: {structure.location.y}, Z: {structure.location.z}
                   </div>
                 </div>
 
-                {structure.Street && (
+                {structure.street && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Street</div>
                     <div className="mt-1 text-gray-900">
-                      {structure.Street.Name}
-                      {structure.StreetNumber && ` #${structure.StreetNumber}`}
+                      {structure.street.name}
+                      {structure.streetNumber && ` #${structure.streetNumber}`}
                     </div>
                   </div>
                 )}
 
-                {structure.District && (
+                {structure.district && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">District</div>
-                    <div className="mt-1 text-gray-900">{structure.District.Name}</div>
+                    <div className="mt-1 text-gray-900">{structure.district.name}</div>
                   </div>
                 )}
 
-                {structure.District?.Town && (
+                {structure.district?.Town && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Town</div>
-                    <div className="mt-1 text-gray-900">{structure.District.Town.Name}</div>
+                    <div className="mt-1 text-gray-900">{structure.district.Town.name}</div>
                   </div>
                 )}
 
                 <div>
                   <div className="text-sm font-medium text-gray-500">World</div>
-                  <div className="mt-1 text-gray-900">{structure.Location.WorldName}</div>
+                  <div className="mt-1 text-gray-900">{structure.location.worldName}</div>
                 </div>
               </div>
             </div>
@@ -195,7 +196,7 @@ export function StructureDetailsPage() {
                                     <td className="px-3 py-2 text-sm text-gray-900">
                                       <div className="flex items-center">
                                         <Package className="h-4 w-4 text-gray-400 mr-2" />
-                                        {item.item.displayName || item.item.name}
+                                        {item.item?.displayName || item.item?.name}
                                       </div>
                                     </td>
                                     <td className="px-3 py-2 text-sm text-gray-900 text-right">

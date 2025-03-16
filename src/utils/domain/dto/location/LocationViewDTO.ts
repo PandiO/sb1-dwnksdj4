@@ -1,14 +1,14 @@
 export interface LocationViewDTO {
-    Id: number;
-    X: number;
-    Y: number;
-    Z: number;
-    Pitch: number;
-    Yaw: number;
-    WorldName: string;
+    id: number;
+    x: number;
+    y: number;
+    z: number;
+    pitch: number;
+    yaw: number;
+    worldName: string;
 }
 
-export function mapFieldDataToForm(data: LocationViewDTO): any {
+export function mapFieldDataToForm(data: any): LocationViewDTO {
     return {
         id: data.Id,
         x: data.X,
