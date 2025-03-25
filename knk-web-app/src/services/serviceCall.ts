@@ -14,14 +14,20 @@ export class ServiceCall {
             baseUrl = args.fetchApiUrl;
         }
 
-        let url = `${baseUrl}/${args.controller}/${args.operation}`;
+        let url = `${baseUrl}/${args.controller}`;
 
         let requestParams: any = {
             method: HttpMethod.Get,
             headers:  {
-                '': ''
+                'Accept': '*/*',
             }
         };
+
+        if (args.httpMethod 
+            // && args.httpMethod != HttpMethod.Post
+        ) {
+            url = `${url}/${args.operation}`;
+        }
 
         if (!args.httpMethod && args.requestData) {
             args.httpMethod = HttpMethod.Post;
@@ -31,24 +37,40 @@ export class ServiceCall {
             args.httpMethod = HttpMethod.Get;
         }
 
-        if (args.httpMethod == HttpMethod.Get) {
-            if (args.requestData) {
-                const queryString = Object.keys(args.requestData).map(key => key + '=' + args.requestData[key].join('&'));
-                url = `${url}?${queryString}`
-            }
-        } else {
-            requestParams = {
-                method: args.httpMethod,
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            };
+        // if (args.httpMethod == HttpMethod.Get) {
+        //     if (args.requestData) {
+        //         try {
+        //             // const queryString = Object.keys(args.requestData).map(key => key + '=' + args.requestData[key]).join('&');
+        //             // url = `${url}?${queryString}`;
+        //         } catch (ex) {
+        //             console.log((ex as any).ErrorMessage);
+        //         }
+        //     }
+        // } else {
+        //     requestParams = {
+        //         method: args.httpMethod,
+        //         headers: {
+        //             'Accept': 'application/json',
+        //             'Content-Type': 'application/json'
+        //         }
+        //     };
         
 
-            if (args.requestData) {
-                requestParams.body = JSON.stringify(args.requestData);
+        //     if (args.requestData) {
+        //         requestParams.body = JSON.stringify(args.requestData);
+        //     }
+        // }
+        requestParams = {
+            method: args.httpMethod,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
+        };
+    
+
+        if (args.requestData) {
+            requestParams.body = JSON.stringify(args.requestData);
         }
 
         try {
@@ -56,8 +78,14 @@ export class ServiceCall {
             const response = await fetch(url, requestParams);
             const result = await response.json();
 
-            if (args.responseHandler) {
-                args.responseHandler.success(result);
+            if (response.ok) {
+                if (args.responseHandler) {
+                    args.responseHandler.success(result);
+                }
+            } else {
+                if (args.responseHandler) {
+                    args.responseHandler.error(result);
+                }
             }
         } catch (ex) {
 
