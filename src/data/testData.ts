@@ -6,6 +6,7 @@ import { StructureViewDTO, StructureStreetViewDTO } from '../utils/domain/dto/st
 import { StorageViewConciseDTO } from '../utils/domain/dto/item/StorageViewConciseDTO';
 import { ItemDTO } from '../utils/domain/dto/item/ItemDTO';
 import { StorageItemDTO } from '../utils/domain/dto/item/StorageItemDTO';
+import { UIFieldConfigurationDTO } from '../utils/domain/dto/UIFieldConfigurationDTO';
 
 // Create LocationViewDTO instances
 const locations: LocationViewDTO[] = [
@@ -353,6 +354,89 @@ const structures: StructureViewDTO[] = [
   }
 ];
 
+// Create UIFieldConfigurationDTO instances for StructureCreateDTO fields
+const uiFieldConfigurations: UIFieldConfigurationDTO[] = [
+  new UIFieldConfigurationDTO({
+    id: 1,
+    objectType: 'structure',
+    fieldName: 'name',
+    label: 'Name',
+    type: 'text',
+    required: true,
+    placeholder: 'Enter structure name',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 2,
+    objectType: 'structure',
+    fieldName: 'description',
+    label: 'Description',
+    type: 'text',
+    required: false,
+    placeholder: 'Enter structure description',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 3,
+    objectType: 'structure',
+    fieldName: 'allowEntry',
+    label: 'Allow Entry',
+    type: 'boolean',
+    required: true,
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 4,
+    objectType: 'structure',
+    fieldName: 'wgRegionId',
+    label: 'Region ID',
+    type: 'number',
+    required: true,
+    placeholder: 'Enter region ID',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 5,
+    objectType: 'structure',
+    fieldName: 'location',
+    label: 'Location',
+    type: 'object',
+    required: true,
+    optionsEndpoint: '/api/Locations',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 6,
+    objectType: 'structure',
+    fieldName: 'street',
+    label: 'Street',
+    type: 'object',
+    required: true,
+    optionsEndpoint: '/api/Streets',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 7,
+    objectType: 'structure',
+    fieldName: 'streetNumber',
+    label: 'Street Number',
+    type: 'number',
+    required: false,
+    placeholder: 'Enter street number',
+    readonly: false
+  }),
+  new UIFieldConfigurationDTO({
+    id: 8,
+    objectType: 'structure',
+    fieldName: 'district',
+    label: 'District',
+    type: 'object',
+    required: true,
+    optionsEndpoint: '/api/Districts',
+    readonly: false
+  })
+];
+
 // Export all created objects
 export const testData = {
   locations,
@@ -362,5 +446,6 @@ export const testData = {
   structures,
   items,
   storages,
-  storageItems
+  storageItems,
+  uiFieldConfigurations
 };
