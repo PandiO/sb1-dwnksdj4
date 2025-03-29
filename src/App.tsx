@@ -6,7 +6,7 @@ import { LandingPage } from './pages/LandingPage';
 import { StructureDetailsPage } from './pages/StructureDetailsPage';
 import { ObjectViewPage } from './pages/ObjectViewPage';
 import { StructureOverviewPage } from './pages/StructureOverviewPage';
-import { UIFieldConfigurationsPage } from './pages/UIFieldConfigurationsPage';
+import UIFieldConfigurationsPage from './pages/UIFieldConfigurationsPage';
 import { DataTable } from './components/DataTable';
 import { testData } from './data/testData';
 import { mapFieldDataToForm as mapStructureFieldDataToForm } from './utils/domain/dto/structure/StructureViewDTO';
@@ -42,8 +42,8 @@ function App() {
             <Route path="/create/:objectType" element={<ObjectCreator />} />
             <Route path="/structure/:id" element={<StructureDetailsPage />} />
             <Route path="/view/:type/:id" element={<ObjectViewPage />} />
+            <Route path="/configurations/:objectType" element={<UIFieldConfigurationsPage objectType="structure" />} />
             <Route path="/structure-overview" element={<StructureOverviewPage />} />
-            <Route path="/ui-field-configurations" element={<UIFieldConfigurationsPage />} />
             <Route path="/dashboard" element={
               <div className="p-8">
                 <div className="max-w-7xl mx-auto space-y-12">

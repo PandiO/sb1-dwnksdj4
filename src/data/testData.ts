@@ -6,7 +6,7 @@ import { StructureViewDTO, StructureStreetViewDTO } from '../utils/domain/dto/st
 import { StorageViewConciseDTO } from '../utils/domain/dto/item/StorageViewConciseDTO';
 import { ItemDTO } from '../utils/domain/dto/item/ItemDTO';
 import { StorageItemDTO } from '../utils/domain/dto/item/StorageItemDTO';
-import { UIFieldConfigurationDTO } from '../utils/domain/dto/UIFieldConfigurationDTO';
+import { UIObjectConfigDto, UIFieldType, ValidationType } from '../utils/domain/dto/UIFieldConfigurations';
 
 // Create LocationViewDTO instances
 const locations: LocationViewDTO[] = [
@@ -354,89 +354,6 @@ const structures: StructureViewDTO[] = [
   }
 ];
 
-// Create UIFieldConfigurationDTO instances for StructureCreateDTO fields
-const uiFieldConfigurations: UIFieldConfigurationDTO[] = [
-  new UIFieldConfigurationDTO({
-    id: 1,
-    objectType: 'structure',
-    fieldName: 'name',
-    label: 'Name',
-    type: 'text',
-    required: true,
-    placeholder: 'Enter structure name',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 2,
-    objectType: 'structure',
-    fieldName: 'description',
-    label: 'Description',
-    type: 'text',
-    required: false,
-    placeholder: 'Enter structure description',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 3,
-    objectType: 'structure',
-    fieldName: 'allowEntry',
-    label: 'Allow Entry',
-    type: 'boolean',
-    required: true,
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 4,
-    objectType: 'structure',
-    fieldName: 'wgRegionId',
-    label: 'Region ID',
-    type: 'number',
-    required: true,
-    placeholder: 'Enter region ID',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 5,
-    objectType: 'structure',
-    fieldName: 'location',
-    label: 'Location',
-    type: 'object',
-    required: true,
-    optionsEndpoint: '/api/Locations',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 6,
-    objectType: 'structure',
-    fieldName: 'street',
-    label: 'Street',
-    type: 'object',
-    required: true,
-    optionsEndpoint: '/api/Streets',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 7,
-    objectType: 'structure',
-    fieldName: 'streetNumber',
-    label: 'Street Number',
-    type: 'number',
-    required: false,
-    placeholder: 'Enter street number',
-    readonly: false
-  }),
-  new UIFieldConfigurationDTO({
-    id: 8,
-    objectType: 'structure',
-    fieldName: 'district',
-    label: 'District',
-    type: 'object',
-    required: true,
-    optionsEndpoint: '/api/Districts',
-    readonly: false
-  })
-];
-
 // Export all created objects
 export const testData = {
   locations,
@@ -446,6 +363,117 @@ export const testData = {
   structures,
   items,
   storages,
-  storageItems,
-  uiFieldConfigurations
+  storageItems
 };
+
+// UI Field Configurations Test Data
+export const uiConfigTestData: UIObjectConfigDto[] = [
+  {
+    objectType: 'structure',
+    title: 'Structure Configuration',
+    layoutStyle: 'standard',
+    fieldGroups: [
+      {
+        name: 'basicInfo',
+        label: 'Basic Information',
+        order: 1,
+        fields: [
+          {
+            name: 'name',
+            label: 'Structure Name',
+            type: UIFieldType.Text,
+            required: true,
+            placeholder: 'Enter structure name',
+            validations: [
+              { type: ValidationType.Required },
+              { type: ValidationType.MinLength, value: 3 }
+            ]
+          },
+          {
+            name: 'description',
+            label: 'Description',
+            type: UIFieldType.Text,
+            required: false,
+            placeholder: 'Enter structure description'
+          }
+        ]
+      },
+      {
+        name: 'location',
+        label: 'Location Details',
+        order: 2,
+        fields: [
+          {
+            name: 'coordinates',
+            label: 'Coordinates',
+            type: UIFieldType.Text,
+            required: true,
+            componentType: 'coordinates-input'
+          },
+          {
+            name: 'district',
+            label: 'District',
+            type: UIFieldType.Dropdown,
+            required: true,
+            referenceObjectType: 'district'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    objectType: 'district',
+    title: 'District Configuration',
+    layoutStyle: 'compact',
+    fields: [
+      {
+        name: 'name',
+        label: 'District Name',
+        type: UIFieldType.Text,
+        required: true,
+        placeholder: 'Enter district name',
+        validations: [
+          { type: ValidationType.Required },
+          { type: ValidationType.MinLength, value: 2 }
+        ]
+      },
+      {
+        name: 'allowEntry',
+        label: 'Allow Entry',
+        type: UIFieldType.Checkbox,
+        required: true,
+        defaultValue: true
+      }
+    ]
+  },
+  {
+    objectType: 'storage',
+    title: 'Storage Configuration',
+    layoutStyle: 'detailed',
+    fieldGroups: [
+      {
+        name: 'capacity',
+        label: 'Capacity Settings',
+        order: 1,
+        fields: [
+          {
+            name: 'maxCapacity',
+            label: 'Maximum Capacity',
+            type: UIFieldType.Number,
+            required: true,
+            validations: [
+              { type: ValidationType.Required }
+            ]
+          },
+          {
+            name: 'itemLimit',
+            label: 'Item Limit',
+            type: UIFieldType.Number,
+            required: true,
+            defaultValue: 64
+          }
+        ]
+      }
+    ]
+  }
+];

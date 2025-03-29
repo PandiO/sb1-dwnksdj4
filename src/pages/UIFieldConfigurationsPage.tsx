@@ -1,317 +1,520 @@
-import React, { useEffect, useState } from "react";
-import { getConfig } from "../config/appConfig";
-import { testData } from "../data/testData";
-import { UIFieldConfigurationsClient } from "../io/UIFieldConfigurationsClient";
-import { UIFieldConfigurationDTO } from "../utils/domain/dto/UIFieldConfigurationDTO";
-import { Loader2, Plus, Pencil, Trash2, X, AlertCircle } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { Settings2, AlertCircle, Loader2, Plus, Pencil, Trash2, LayoutGrid, ListPlus } from 'lucide-react';
+import { UIObjectConfigDto, UIFieldType, ValidationType, UIFieldGroupDto, UIFieldDto } from '../utils/domain/dto/UIFieldConfigurations';
+import { uiFieldConfigurationsManager } from '../io/UIFieldConfigurationsClient';
+import { getConfig } from '../config/appConfig';
+import { uiConfigTestData } from '../data/testData';
 
-export function UIFieldConfigurationsPage() {
-  const [configurations, setConfigurations] = useState<UIFieldConfigurationDTO[]>([]);
-  const [editingConfig, setEditingConfig] = useState<UIFieldConfigurationDTO | null>(null);
+interface UIFieldConfigurationsPageProps {
+  objectType: string;
+}
+
+const createEmptyConfig = (): UIObjectConfigDto => ({
+  objectType: '',
+  title: '',
+  layoutStyle: 'standard',
+  fields: [],
+  fieldGroups: []
+});
+
+const createEmptyField = (): UIFieldDto => ({
+  name: '',
+  label: '',
+  type: UIFieldType.Text,
+  required: false,
+  order: 0
+});
+
+const createEmptyFieldGroup = (): UIFieldGroupDto => ({
+  name: '',
+  label: '',
+  order: 0,
+  fields: []
+});
+
+function UIFieldConfigurationsPage({ objectType }: UIFieldConfigurationsPageProps) {
+  const [configs, setConfigs] = useState<UIObjectConfigDto[]>([]);
+  const [editingConfig, setEditingConfig] = useState<UIObjectConfigDto | null>(null);
+  const [editingField, setEditingField] = useState<UIFieldDto | null>(null);
+  const [editingFieldGroup, setEditingFieldGroup] = useState<UIFieldGroupDto | null>(null);
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState<number>(-1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const client = UIFieldConfigurationsClient.getInstance();
-  const useTestData = getConfig('useTestData');
-
   useEffect(() => {
-    const fetchConfigurations = async () => {
+    async function fetchConfig() {
       try {
-        if (useTestData) {
-          setConfigurations(testData.uiFieldConfigurations);
+        setLoading(true);
+        setError(null);
+
+        let data: UIObjectConfigDto[] = [];
+
+        if (getConfig('useTestData')) {
+          data = uiConfigTestData;
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 500));
         } else {
-          const data = await client.getAll();
-          setConfigurations(data);
+          data = await uiFieldConfigurationsManager.getAll();
         }
-      } catch (err) {
-        setError('Failed to load UI field configurations');
-        console.error(err);
+
+        setConfigs(data);
+      } catch (error) {
+        setError('Failed to load configuration');
+        console.error('Error fetching UIObjectConfig:', error);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchConfigurations();
-  }, [useTestData]);
+    fetchConfig();
+  }, [objectType]);
 
   const handleSave = async () => {
     if (!editingConfig) return;
 
     try {
-      if (useTestData) {
-        // Simulate API call with test data
-        const updatedConfig = new UIFieldConfigurationDTO({
-          ...editingConfig,
-          id: editingConfig.id || configurations.length + 1
-        });
-        if (editingConfig.id === 0) {
-          setConfigurations([...configurations, updatedConfig]);
+      setLoading(true);
+      if (getConfig('useTestData')) {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (editingConfig.objectType === '') {
+          setConfigs(prev => [...prev, { ...editingConfig, objectType: `config-${Date.now()}` }]);
         } else {
-          setConfigurations(configurations.map(c => 
-            c.id === updatedConfig.id ? updatedConfig : c
+          setConfigs(prev => prev.map(c => 
+            c.objectType === editingConfig.objectType ? editingConfig : c
           ));
         }
       } else {
-        // Real API call
-        if (editingConfig.id === 0) {
-          const newConfig = await client.create(editingConfig);
-          setConfigurations([...configurations, newConfig]);
+        if (editingConfig.objectType === '') {
+          await uiFieldConfigurationsManager.create(editingConfig);
         } else {
-          const updatedConfig = await client.update(editingConfig);
-          setConfigurations(configurations.map(c => 
-            c.id === updatedConfig.id ? updatedConfig : c
-          ));
+          await uiFieldConfigurationsManager.update(editingConfig);
         }
+        // Refresh the list
+        const updatedConfigs = await uiFieldConfigurationsManager.getAll();
+        setConfigs(updatedConfigs);
       }
       setEditingConfig(null);
-    } catch (err) {
+    } catch (error) {
       setError('Failed to save configuration');
-      console.error(err);
+      console.error('Error saving configuration:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (objectType: string) => {
     try {
-      if (!useTestData) {
-        await client.delete(id);
+      if (!getConfig('useTestData')) {
+        await uiFieldConfigurationsManager.delete(parseInt(objectType));
       }
-      setConfigurations(configurations.filter(c => c.id !== id));
-      // Remove from state regardless of data source
-      setError(null);
-    } catch (err) {
+      setConfigs(prev => prev.filter(c => c.objectType !== objectType));
+    } catch (error) {
       setError('Failed to delete configuration');
-      console.error(err);
+      console.error('Error deleting configuration:', error);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
+          <h3 className="mt-4 text-lg font-medium text-gray-900">
+            Loading Configuration...
+          </h3>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+          <h3 className="mt-4 text-lg font-medium text-gray-900">
+            Error Loading Configuration
+          </h3>
+          <p className="mt-2 text-sm text-gray-500">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">UI Field Configurations</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Manage field configurations for different object types
-          </p>
-        </div>
-        <button
-          onClick={() => setEditingConfig(new UIFieldConfigurationDTO({}))}
-          className="btn-primary mt-4 sm:mt-0"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Configuration
-        </button>
-      </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-          <AlertCircle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0" />
-          <p className="text-sm text-red-600 flex-1">{error}</p>
-        </div>
-      )}
-
-      <div className="panel overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Object Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {configurations.map(config => (
-              <tr key={config.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{config.objectType}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{config.fieldName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{config.label}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {config.type}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    config.required
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {config.required ? 'Yes' : 'No'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => setEditingConfig(config)}
-                    className="btn-secondary mr-2 py-1 px-2"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(config.id)}
-                    className="btn-secondary py-1 px-2 text-red-600 hover:text-red-700 hover:border-red-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {editingConfig && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {editingConfig.id === 0 ? "Add New" : "Edit"} Configuration
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white shadow-sm rounded-lg">
+          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  UI Field Configurations
                 </h2>
-                <button
-                  onClick={() => setEditingConfig(null)}
-                  className="text-gray-400 hover:text-gray-500 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+                <p className="mt-1 text-sm text-gray-500">
+                  Manage field configurations for different object types
+                </p>
               </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Object Type
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="e.g., structure"
-                    value={editingConfig.objectType}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, objectType: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Field Name
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="e.g., name"
-                    value={editingConfig.fieldName}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, fieldName: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Label
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="e.g., Name"
-                    value={editingConfig.label}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, label: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type
-                  </label>
-                  <select
-                    className="input"
-                    value={editingConfig.type}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, type: e.target.value }))}
-                  >
-                    <option value="">Select type...</option>
-                    <option value="text">Text</option>
-                    <option value="number">Number</option>
-                    <option value="boolean">Boolean</option>
-                    <option value="object">Object</option>
-                    <option value="array">Array</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Placeholder
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="Enter placeholder text"
-                    value={editingConfig.placeholder || ''}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, placeholder: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Options Endpoint
-                  </label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="e.g., /api/items"
-                    value={editingConfig.optionsEndpoint || ''}
-                    onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, optionsEndpoint: e.target.value }))}
-                  />
-                </div>
-
-                <div className="sm:col-span-2 flex items-center space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                      checked={editingConfig.required}
-                      onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, required: e.target.checked }))}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Required</span>
-                  </label>
-
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300 text-primary focus:ring-primary"
-                      checked={editingConfig.readonly}
-                      onChange={e => setEditingConfig(new UIFieldConfigurationDTO({ ...editingConfig, readonly: e.target.checked }))}
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Read Only</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
-                onClick={() => setEditingConfig(null)}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
+                onClick={() => setEditingConfig(createEmptyConfig())}
                 className="btn-primary"
               >
-                {editingConfig.id === 0 ? 'Create' : 'Update'} Configuration
+                <Plus className="h-5 w-5 mr-2" />
+                Add New Configuration
               </button>
             </div>
           </div>
+          
+          <div className="px-4 py-5 sm:p-6">
+            {editingConfig ? (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Configuration Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editingConfig.objectType}
+                    onChange={e => setEditingConfig({
+                      ...editingConfig,
+                      objectType: e.target.value
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    placeholder="Enter configuration name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Display Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editingConfig.title}
+                    onChange={e => setEditingConfig({
+                      ...editingConfig,
+                      title: e.target.value
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    placeholder="Enter configuration title"
+                  />
+                </div>
+
+                {/* Field Groups Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900">Field Groups</h3>
+                    <button
+                      onClick={() => setEditingFieldGroup(createEmptyFieldGroup())}
+                      className="btn-secondary"
+                    >
+                      <LayoutGrid className="h-4 w-4 mr-2" />
+                      Add Group
+                    </button>
+                  </div>
+                  
+                  {editingConfig.fieldGroups?.map((group, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">{group.label || 'Untitled Group'}</h4>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              setSelectedGroupIndex(index);
+                              setEditingFieldGroup(group);
+                            }}
+                            className="text-gray-400 hover:text-gray-500"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              const newConfig = { ...editingConfig };
+                              newConfig.fieldGroups = newConfig.fieldGroups?.filter((_, i) => i !== index);
+                              setEditingConfig(newConfig);
+                            }}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Fields within group */}
+                      <div className="space-y-2">
+                        {group.fields.map((field, fieldIndex) => (
+                          <div key={fieldIndex} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <div>
+                              <span className="font-medium">{field.label}</span>
+                              <span className="ml-2 text-sm text-gray-500">({field.type})</span>
+                            </div>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setEditingField(field)}
+                                className="text-gray-400 hover:text-gray-500"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const newConfig = { ...editingConfig };
+                                  newConfig.fieldGroups![index].fields = group.fields.filter((_, i) => i !== fieldIndex);
+                                  setEditingConfig(newConfig);
+                                }}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => {
+                            setSelectedGroupIndex(index);
+                            setEditingField(createEmptyField());
+                          }}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          <ListPlus className="h-4 w-4 mr-2" />
+                          Add Field
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setEditingConfig(null)}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="btn-primary"
+                  >
+                    Save Configuration
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {configs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Settings2 className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No configurations</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Get started by creating a new configuration.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {configs.map((config) => (
+                      <div
+                        key={config.objectType}
+                        className="relative bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900">
+                              {config.title || 'Untitled Configuration'}
+                            </h3>
+                            <p className="mt-1 text-sm text-gray-500">
+                              Type: {config.objectType}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setEditingConfig(config)}
+                              className="text-gray-400 hover:text-gray-500"
+                            >
+                              <Pencil className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(config.objectType)}
+                              className="text-gray-400 hover:text-red-500"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Field Group Editor Modal */}
+          {editingFieldGroup && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {selectedGroupIndex === -1 ? 'Add New Group' : 'Edit Group'}
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Group Name</label>
+                    <input
+                      type="text"
+                      value={editingFieldGroup.name}
+                      onChange={e => setEditingFieldGroup({
+                        ...editingFieldGroup,
+                        name: e.target.value
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Display Label</label>
+                    <input
+                      type="text"
+                      value={editingFieldGroup.label}
+                      onChange={e => setEditingFieldGroup({
+                        ...editingFieldGroup,
+                        label: e.target.value
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Order</label>
+                    <input
+                      type="number"
+                      value={editingFieldGroup.order}
+                      onChange={e => setEditingFieldGroup({
+                        ...editingFieldGroup,
+                        order: parseInt(e.target.value)
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => setEditingFieldGroup(null)}
+                      className="btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newConfig = { ...editingConfig! };
+                        if (selectedGroupIndex === -1) {
+                          newConfig.fieldGroups = [...(newConfig.fieldGroups || []), editingFieldGroup];
+                        } else {
+                          newConfig.fieldGroups![selectedGroupIndex] = editingFieldGroup;
+                        }
+                        setEditingConfig(newConfig);
+                        setEditingFieldGroup(null);
+                      }}
+                      className="btn-primary"
+                    >
+                      Save Group
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Field Editor Modal */}
+          {editingField && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {editingField.name ? 'Edit Field' : 'Add New Field'}
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Field Name</label>
+                    <input
+                      type="text"
+                      value={editingField.name}
+                      onChange={e => setEditingField({
+                        ...editingField,
+                        name: e.target.value
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Display Label</label>
+                    <input
+                      type="text"
+                      value={editingField.label}
+                      onChange={e => setEditingField({
+                        ...editingField,
+                        label: e.target.value
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Field Type</label>
+                    <select
+                      value={editingField.type}
+                      onChange={e => setEditingField({
+                        ...editingField,
+                        type: e.target.value as UIFieldType
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    >
+                      {Object.values(UIFieldType).map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="required"
+                      checked={editingField.required}
+                      onChange={e => setEditingField({
+                        ...editingField,
+                        required: e.target.checked
+                      })}
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    />
+                    <label htmlFor="required" className="ml-2 block text-sm text-gray-900">
+                      Required Field
+                    </label>
+                  </div>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => setEditingField(null)}
+                      className="btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newConfig = { ...editingConfig! };
+                        const group = newConfig.fieldGroups![selectedGroupIndex];
+                        if (!editingField.name) {
+                          group.fields.push(editingField);
+                        } else {
+                          const fieldIndex = group.fields.findIndex(f => f.name === editingField.name);
+                          group.fields[fieldIndex] = editingField;
+                        }
+                        setEditingConfig(newConfig);
+                        setEditingField(null);
+                      }}
+                      className="btn-primary"
+                    >
+                      Save Field
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+export default UIFieldConfigurationsPage;
